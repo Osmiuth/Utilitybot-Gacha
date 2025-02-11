@@ -60,7 +60,6 @@ class Wheel {
             game.setTime(game.getTime()-10);
             this.CurrentChance = rand.nextFloat(100);
             if (this.CurrentChance <= PayOffChance *100){
-                System.out.println(this.CurrentChance);
                 game.setMoney(game.getMoney()+this.PayOff);
             } 
         }
@@ -70,6 +69,9 @@ class MachineBot {
     private String action = "none";
     private LinkedList<Integer> LWheelA = new LinkedList<Integer>();
     private LinkedList<Integer> LWheelB = new LinkedList<Integer>();
+    private int epoch = 5;
+    private int tempA;
+    private int tempB;
 
     public LinkedList<Integer> getListA() {
         return this.LWheelA;
@@ -79,18 +81,48 @@ class MachineBot {
         return this.LWheelB;
     }
 
+    public String getAction() {
+        return this.action;
+    }
+
     public void solve(Game game, Wheel wheelA, Wheel wheelB) {
-        if (action.equals("none") && (LWheelA.size() < 5)) {
-            this.action = "rolling";
+        if (this.action.equals("preferred_A")) {
             LWheelA.add(game.getMoney());
             wheelA.roll(game);
-            this.action = "none";
-        } else if (LWheelA.size() >= 5 && (action.equals("none"))) {
-            this.action = "rolling";
+        } else if (this.action.equals("preferred_B")) {
             LWheelB.add(game.getMoney());
             wheelB.roll(game);
-            this.action = "none";
+        }
+
+        if ((LWheelA.size() % 5 == 0) && (LWheelB.size() % 5 == 0) && (LWheelA.size() > 0) && (LWheelB.size() > 0)) {
+            for (int j = LWheelA.size() - epoch; j < LWheelA.size(); j++) {
+                this.tempA = this.tempA + LWheelA.get(j);
+            }
+
+
+            for (int k = LWheelB.size() - epoch; k < LWheelB.size(); k++) {
+                this.tempB = this.tempB + LWheelB.get(k);
+            }
+
+
+            if (this.tempA > this.tempB){
+                this.action = "preferred_A";
+            } else if (tempA < tempB){
+                this.action = "preferred_B";
+            } else if (tempA == tempB){
+                this.action = "none";
+            }
         } 
+         else if (this.action.equals("none") || (LWheelA.size() < epoch) || (LWheelB.size() < epoch)) {
+            this.action = "rolling";
+            wheelA.roll(game);
+            LWheelA.add(game.getMoney());
+
+            wheelB.roll(game);
+            LWheelB.add(game.getMoney());
+            this.action = "none";
+
+        }
     }
 
 
@@ -108,19 +140,21 @@ public static void main(String[] args){
  */
     Game game = new Game();
     game.setMoney(100);
-    game.setTime(100);
+    game.setTime(3600);
     Wheel wheelA = new Wheel();
     wheelA.setPayOff(5);
     wheelA.setPayOffChance((float) 0.75);
     Wheel wheelB = new Wheel();
-    wheelB.setPayOff(100);
+    wheelB.setPayOff(1000);
     wheelB.setPayOffChance((float) 0.1);
     MachineBot bot = new MachineBot();
 
     while (game.getMoney() > 0 && game.getTime() > 0){
         bot.solve(game, wheelA, wheelB);
     }  
+    System.out.println(game.getMoney());
 
-    System.out.println(bot.getListB());
+    System.out.println(bot.getAction());
+
 }
 }
