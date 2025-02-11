@@ -94,7 +94,7 @@ class MachineBot {
             wheelB.roll(game);
         }
 
-        if ((LWheelA.size() % 5 == 0) && (LWheelB.size() % 5 == 0) && (LWheelA.size() > 0) && (LWheelB.size() > 0)) {
+        if ((LWheelA.size() % epoch == 0) && (LWheelB.size() % epoch == 0) && (LWheelA.size() > 0) && (LWheelB.size() > 0)) {
             for (int j = LWheelA.size() - epoch; j < LWheelA.size(); j++) {
                 this.tempA = this.tempA + LWheelA.get(j);
             }
@@ -113,7 +113,7 @@ class MachineBot {
                 this.action = "none";
             }
         } 
-         else if (this.action.equals("none") || (LWheelA.size() < epoch) || (LWheelB.size() < epoch)) {
+         else if (this.action.equals("none")) {
             this.action = "rolling";
             wheelA.roll(game);
             LWheelA.add(game.getMoney());
