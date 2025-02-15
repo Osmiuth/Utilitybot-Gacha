@@ -93,6 +93,8 @@ class MachineBot {
     private String action = "none";
     private LinkedList<Integer> LWheelA = new LinkedList<Integer>(); //Wheel A history
     private LinkedList<Integer> LWheelB = new LinkedList<Integer>(); //Wheel B history
+    private LinkedList<String> BotActions = new LinkedList<String>(); //Bot interaction history logs
+    private LinkedList<Integer> Rounds = new LinkedList<Integer>(); //Rounds history logs
     private int epoch = 5; //epoch value
     private int tempA; //tempA storage value
     private int tempB; //tempB storage value
@@ -105,15 +107,28 @@ class MachineBot {
         return this.LWheelB;
     }
 
+    public LinkedList<String> getBotActions() { //For debugging purposes
+        return this.BotActions;
+    }
+
+    public LinkedList<Integer> getRounds() { //For debugging purposes
+        return this.Rounds;
+    }
+
+
     public String getAction() { //Returns the preferred wheel of the agent
         return this.action;
     }
 
     public void solve(Game game, Wheel wheelA, Wheel wheelB) {
         if (this.action.equals("preferred_A")) {
+            BotActions.add(this.action);
+            Rounds.add(game.getTime()/10);
             LWheelA.add(game.getMoney());
             wheelA.roll(game);
         } else if (this.action.equals("preferred_B")) {
+            BotActions.add(this.action);
+            Rounds.add(game.getTime()/10);
             LWheelB.add(game.getMoney());
             wheelB.roll(game);
         }
@@ -128,6 +143,13 @@ class MachineBot {
                 this.tempB = this.tempB + LWheelB.get(k); //Precept history of wheelB
             }
 
+            /**
+             * Below this line is a comparison tree that determines the future action of the agent. If tempA is greater than tempB, then the first wheel will be accepted, if tempB is greater than tempA
+             * then the second wheel will be accepted.
+             * 
+             * Otherwise, if both are equal, then a roll will be made again.
+             * 
+             */
 
             if (this.tempA > this.tempB){
                 this.action = "preferred_A";
@@ -139,9 +161,13 @@ class MachineBot {
         } 
          else if (this.action.equals("none")) {
             this.action = "rolling";
+            BotActions.add(this.action);
+            Rounds.add(game.getTime()/10);
             wheelA.roll(game);
             LWheelA.add(game.getMoney()); //Initial stage, where precept history is below the epoch value
 
+            BotActions.add(this.action);
+            Rounds.add(game.getTime()/10);
             wheelB.roll(game);
             LWheelB.add(game.getMoney()); //Initial stage, where precept history is below the epoch value
             this.action = "none";
@@ -156,32 +182,50 @@ public class main {
 
 public static void main(String[] args){
 
+    /**
+     * EVERYTHING BELOW HERE IS JUST TO CREATE THE GAME
+     * 
+     * 
+     */
+
     Scanner scan = new Scanner(System.in);
     Game game = new Game();
 
     System.out.print("Set initial money: \n");
-    game.setMoney(scan.nextInt());
+    game.setMoney((int) scan.nextInt());
     System.out.print("Set initial Time: \n");
-    game.setTime(scan.nextInt());
+    game.setTime((int) scan.nextInt());
+    int oldTime = game.getTime();
+    int oldMoney = game.getMoney();
     Wheel wheelA = new Wheel();
     System.out.print("Set Wheel A's Payoff: \n");
-    wheelA.setPayOff(scan.nextInt());
-    System.out.print("Set Wheel B's Payoff chance: \n");
-    wheelA.setPayOffChance(scan.nextFloat());
+    wheelA.setPayOff((int) scan.nextInt());
+    System.out.print("Set Wheel A's Payoff chance: \n");
+    wheelA.setPayOffChance((float) scan.nextInt()/100);
     Wheel wheelB = new Wheel();
     System.out.print("Set Wheel B's Payoff: \n");
-    wheelB.setPayOff(scan.nextInt());
+    wheelB.setPayOff((int) scan.nextInt());
     System.out.print("Set Wheel B's Payoff chance: \n");
-    wheelB.setPayOffChance(scan.nextFloat());
+    wheelB.setPayOffChance((float) scan.nextInt()/100);
 
     MachineBot bot = new MachineBot();
-
     while (game.getMoney() > 0 && game.getTime() > 0){
         bot.solve(game, wheelA, wheelB);
     }  
-    System.out.println(game.getMoney() + " Money earned during " + game.getTime() + " seconds.");
+    System.out.println(game.getMoney() + " Current money");
+    System.out.println(game.getMoney() - oldMoney + " Earned after " + oldTime + " seconds.");
 
     System.out.println(bot.getAction());
 
-}
+    System.out.println("Would you like a detailed log of everything that transpired? y/n");
+    String ans = scan.next();
+    if (ans.equals("y")) {
+            System.out.println("Wheel A logs: " + bot.getListA());
+            System.out.println("Wheel B logs: " + bot.getListB());
+            System.out.println("Rounds: " + bot.getRounds());
+            System.out.println("Actions: " + bot.getBotActions());
+        } else {
+            //Nothing happens
+        }
+    }
 }
