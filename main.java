@@ -96,10 +96,9 @@ class MachineBot {
     private LinkedList<String> BotActions = new LinkedList<String>(); //Bot interaction history logs
     private LinkedList<Integer> Rounds = new LinkedList<Integer>(); //Rounds history logs
     private int epoch = 5; //epoch value
-    private int index_A; //Index variable to address the proportion problem
-    private int index_B; //Index variable to address the proportion problem
-    private int tempA; //tempA storage value
-    private int tempB; //tempB storage value
+    private int index; //Index variable to address the proportion problem
+    private float tempA; //tempA storage value
+    private float tempB; //tempB storage value
 
     public LinkedList<Integer> getListA() { //For debugging purposes
         return this.LWheelA;
@@ -136,20 +135,21 @@ class MachineBot {
         }
 
         if ((LWheelA.size() % epoch == 0) && (LWheelB.size() % epoch == 0) && (LWheelA.size() > 0) && (LWheelB.size() > 0)) {
-            index_A = epoch * wheelA.getPayOff();
-            index_B = epoch * wheelB.getPayOff();
+            index = epoch * 100;
             for (int j = LWheelA.size() - epoch; j < LWheelA.size(); j++) {
                 this.tempA = this.tempA + LWheelA.get(j); //Precept history of wheelA
             }
 
-            this.tempA = this.tempA / (this.tempA + index_A);
-            this.tempA = this.tempB / (this.tempB + index_B);
+            this.tempA = this.tempA / (index);
 
 
             for (int k = LWheelB.size() - epoch; k < LWheelB.size(); k++) {
                 this.tempB = this.tempB + LWheelB.get(k); //Precept history of wheelB
             }
 
+            this.tempB = this.tempB / (index);
+            
+            System.out.println(this.tempA + " " + this.tempB);
             /**
              * Below this line is a comparison tree that determines the future action of the agent. If tempA is greater than tempB, then the first wheel will be accepted, if tempB is greater than tempA
              * then the second wheel will be accepted.
@@ -160,23 +160,24 @@ class MachineBot {
 
             if (this.tempA > this.tempB){
                 this.action = "preferred_A";
-            } else if (tempA < tempB){
+            } else if (this.tempA < this.tempB){
                 this.action = "preferred_B";
-            } else if (tempA == tempB){
+            } else if (this.tempA == this.tempB){
                 this.action = "none";
             }
+
         } 
          else if (this.action.equals("none")) {
             this.action = "rolling";
             BotActions.add(this.action);
             Rounds.add(game.getTime()/10);
             wheelA.roll(game);
-            LWheelA.add(game.getMoney()); //Initial stage, where precept history is below the epoch value
+            LWheelA.add(game.getMoney()-wheelB.getPayOff()); //Initial stage, where precept history is below the epoch value
 
             BotActions.add(this.action);
             Rounds.add(game.getTime()/10);
             wheelB.roll(game);
-            LWheelB.add(game.getMoney()); //Initial stage, where precept history is below the epoch value
+            LWheelB.add(game.getMoney()-wheelA.getPayOff()); //Initial stage, where precept history is below the epoch value
             this.action = "none";
 
         }
