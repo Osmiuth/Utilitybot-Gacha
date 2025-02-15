@@ -72,7 +72,7 @@ class Wheel {
  * This agent is Utility-based, as it focuses on having the most amount of money.
  * 
  * 1. Runs both fortune wheels if it does not have any actions for an amount of an epoch (in this case, epoch = 5), during this phase, it sets its action into, "rolling"
- * 2. Agent compares the history of both fortune wheels, and see which one has a bigger value in terms of payoff.
+ * 2. Agent compares the history of both fortune wheels, and see which one has a bigger value in terms of payoff divided by the index of epoch * payoff.
  * 3. If a fortune wheel has a bigger value than the other, the agent sets its action to "preferred_A" or "preferred_B"
  * 4. If both fortune wheels have an equal value, it sets its own action into "none", and the agent runs step 1 over again.
  * 
@@ -96,6 +96,8 @@ class MachineBot {
     private LinkedList<String> BotActions = new LinkedList<String>(); //Bot interaction history logs
     private LinkedList<Integer> Rounds = new LinkedList<Integer>(); //Rounds history logs
     private int epoch = 5; //epoch value
+    private int index_A;
+    private int index_B;
     private int tempA; //tempA storage value
     private int tempB; //tempB storage value
 
@@ -134,9 +136,14 @@ class MachineBot {
         }
 
         if ((LWheelA.size() % epoch == 0) && (LWheelB.size() % epoch == 0) && (LWheelA.size() > 0) && (LWheelB.size() > 0)) {
+            index_A = epoch * wheelA.getPayOff();
+            index_B = epoch * wheelB.getPayOff();
             for (int j = LWheelA.size() - epoch; j < LWheelA.size(); j++) {
                 this.tempA = this.tempA + LWheelA.get(j); //Precept history of wheelA
             }
+
+            this.tempA = this.tempA / (this.tempA + index_A);
+            this.tempA = this.tempB / (this.tempB + index_B);
 
 
             for (int k = LWheelB.size() - epoch; k < LWheelB.size(); k++) {
