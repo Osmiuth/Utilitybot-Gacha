@@ -96,8 +96,8 @@ class MachineBot {
     private LinkedList<String> BotActions = new LinkedList<String>(); //Bot interaction history logs
     private LinkedList<Integer> Rounds = new LinkedList<Integer>(); //Rounds history logs
     private int epoch = 5; //epoch value
-    private int index_A;
-    private int index_B;
+    private int index_A; //Index variable to address the proportion problem
+    private int index_B; //Index variable to address the proportion problem
     private int tempA; //tempA storage value
     private int tempB; //tempB storage value
 
