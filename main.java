@@ -69,7 +69,7 @@ class Wheel {
 /**
  * ALGORITHM OF MACHINE BOT
  * 
- * This agent is Utility-based, as it focuses on having the most amount of
+ * This agent is Utility-based, as it focuses on having the most amount of money.
  * 
  * 1. Runs both fortune wheels if it does not have any actions for an amount of an epoch (in this case, epoch = 5), during this phase, it sets its action into, "rolling"
  * 2. Agent compares the history of both fortune wheels, and see which one has a bigger value in terms of payoff.
