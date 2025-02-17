@@ -1,5 +1,5 @@
-import java.util.Random;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -9,6 +9,8 @@ import java.util.Scanner;
  * class Wheel is an object that instantiates Payoff, PayOffChance, and CurrentChance. A setter and getter method for PayOff and PayOffChance is created for any user-defined
  * modifications.
  * class MachineBot is an object that acts as the agent, wherein its objective is to have as much money in the given time being allotted.
+ * 
+ * class Game has getMoney, setMoney, getTime, and setTime. All of this are for user-defined operations, which will be used as the environment for the demonstration of the utility-based learning agent.
  * 
  */
 
@@ -34,11 +36,30 @@ class Game { //OOP class for Game, this is so it's modular and easy to update.
 
 }
 
+/**
+ * 
+ * Class Wheel is the object class that allows the agent to roll the wheel, in order to gain money.
+ * 
+ * Class Wheel has PayOff,PayOff0,PayOff1,PayOff5,PayOff100,and PayOffChance.
+ * PayOff0-PayOff100 are the user-defined luck percentage for each denomination that can possibly be earned within the rolling of the wheel.
+ * This class handles the luck-based environmment, allowing for a schocastic path.
+ * This class has the getPayOff, getPayOffChance, setPayOffChance, getPayOff0, getPayOff1, getPayOff5, getPayOff100, all of which are for debugging purposes.
+ * 
+ */
+
 class Wheel {
-        private int PayOff = 0;
+        private int PayOff = 0; //Payoff amount of the Wheel
+        private float PayOff0; //Chance for 0 denomination to be rolled
+        private float PayOff1; //Chance for 1 denomination to be rolled
+        private float PayOff5; //Chance for 5 denomination to be rolled
+        private float PayOff100; //Chance for 100 denomination to be rolled
         private float PayOffChance = 0;
         private float CurrentChance = 0;
         Random rand = new Random();
+
+        public int getPayOff(){
+            return this.PayOff;
+        }
 
         public float getPayOffChance(){ //Getter method for chance, this is for debugging purposes.
             return this.PayOffChance;
@@ -48,27 +69,55 @@ class Wheel {
             this.PayOffChance = n;
         }
 
-        public void roll(Game game) { //Rolling function
+        public float getPayOff0(){ //Getter method for PayOff0
+            return this.PayOff0;
+        }
+
+        public float getPayOff1(){ //Getter method for PayOff1
+            return this.PayOff1;
+        }
+
+        public float getPayOff5(){ //Getter method for PayOff5
+            return this.PayOff5;
+        }
+
+        public float getPayOff100(){ //Getter method for PayOff100
+            return this.PayOff100;
+        }
+
+        public void setPayOff0(float n){ //Setter method for PayOff0
+            this.PayOff0 = n;
+        }
+
+        public void setPayOff1(float n){ //Setter method for PayOff1
+            this.PayOff1 = n;
+        }
+
+        public void setPayOff5(float n){ //Setter method for PayOff5
+            this.PayOff5 = n;
+        }
+
+        public void setPayOff100(float n){ //Setter method for PayOff100
+            this.PayOff100 = n;
+        }
+
+        public void roll(Game game) { //Rolling function, this is to allow agents to roll the wheel.
+            this.CurrentChance = rand.nextFloat(100); //random function (acts as an RNG element)
+            if (this.CurrentChance <= PayOff0 *100){ //probability if-decision
+                this.PayOff = 0; 
+                game.setMoney(game.getMoney()+this.PayOff); //adds payoff money to the overall money of the player.
+            } else if (this.CurrentChance <= PayOff1 * 100){
+                this.PayOff = 1;
+                game.setMoney(game.getMoney()+this.PayOff); //adds payoff money to the overall money of the player.
+            } else if (this.CurrentChance <= PayOff5 * 100){
+                this.PayOff = 5;
+                game.setMoney(game.getMoney()+this.PayOff); //adds payoff money to the overall money of the player.
+            } else if (this.CurrentChance <= PayOff100 * 100){
+                this.PayOff = 100;
+                game.setMoney(game.getMoney()+this.PayOff); //adds payoff money to the overall money of the player.
+            }
             game.setMoney(game.getMoney()-1); //decreases the money for every roll
             game.setTime(game.getTime()-10); //decreases the time for every roll
-            this.CurrentChance = rand.nextFloat(100); //random function (acts as an RNG element)
-            this.PayOff = rand.nextInt(1,3); //random function that determines the payoff of the wheel (1, 5, 100 coins)
-            switch (this.PayOff) {
-                case 1:
-                    this.PayOff = 1;
-                    break;
-                case 2:
-                    this.PayOff = 5;
-                    break;
-                case 3:
-                    this.PayOff = 100;
-                    break;
-                default:
-                    break;
-            }
-            if (this.CurrentChance <= PayOffChance *100){ //probability if-decision
-                game.setMoney(game.getMoney()+this.PayOff); //adds payoff money to the overall money of the player.
-            } 
         }
 }
 
@@ -77,7 +126,7 @@ class Wheel {
  * 
  * This agent is Utility-based learning agent, as it focuses on having the most amount of money.
  * 
- * 1. Runs both fortune wheels if it does not have any actions for an amount of an epoch (in this case, epoch = 15), during this phase, it sets its action into, "rolling"
+ * 1. Runs both fortune wheels if it does not have any actions for an amount of an epoch (in this case, epoch = time/10 * 0.2), during this phase, it sets its action into, "rolling"
  * 2. Agent compares the history of both fortune wheels, and see which one has a bigger value in terms of payoff divided by the index of epoch * payoff.
  * 3. If a fortune wheel has a bigger value than the other, the agent sets its action to "preferred_A" or "preferred_B"
  * 4. If both fortune wheels have an equal value, it sets its own action into "none", and the agent runs step 1 over again.
@@ -111,6 +160,14 @@ class MachineBot {
 
     public LinkedList<Integer> getListA() { //For debugging purposes
         return this.LWheelA;
+    }
+
+    public void setEpoch(int n) {
+        this.epoch = n;
+    }
+
+    public int getEpoch() {
+        return this.epoch;
     }
 
     public LinkedList<Integer> getListB() { //For debugging purposes
@@ -184,12 +241,12 @@ class MachineBot {
             BotActions.add(this.action);
             Rounds.add(game.getTime()/10);
             wheelA.roll(game);
-            LWheelA.add(game.getMoney()); //Initial stage, where precept history is below the epoch value, and the stage where the agent 're-learns' the environment.
+            LWheelA.add(game.getMoney()-wheelB.getPayOff()); //Initial stage, where precept history is below the epoch value, and the stage where the agent 're-learns' the environment.
 
             BotActions.add(this.action);
             Rounds.add(game.getTime()/10);
             wheelB.roll(game);
-            LWheelB.add(game.getMoney()); //Initial stage, where precept history is below the epoch value, and the stage where the agent 're-learns' the environment.
+            LWheelB.add(game.getMoney()-wheelA.getPayOff()); //Initial stage, where precept history is below the epoch value, and the stage where the agent 're-learns' the environment.
             this.action = "none";
 
         }
@@ -207,36 +264,71 @@ public static void main(String[] args){
      * Everything that was instantiated here is for the sake of demonstration only. This section of the code represents the user-defined variables the users
      * will be placing.
      * 
-     *
-     * 
+     *It also has basic error-checks, in case the percentage goes beyond 100 or goes less of 100. 
+     * Basic checks for scanning inputs are not implemented.
      */
 
     Scanner scan = new Scanner(System.in);
     Game game = new Game();
 
     System.out.print("Set initial money: \n");
-    game.setMoney((int) scan.nextInt());
+    game.setMoney((int) scan.nextInt()); //Money Variable has been set here.
     System.out.print("Set initial Time: \n");
-    game.setTime((int) scan.nextInt());
-    int oldTime = game.getTime();
-    int oldMoney = game.getMoney();
+    game.setTime((int) scan.nextInt()); //Time Variable has been set here.
+    int oldTime = game.getTime(); //De-referenced Time is stored
+    int oldMoney = game.getMoney(); //De-referenced Money is stored.
     Wheel wheelA = new Wheel();
-    System.out.print("Set Wheel A's Payoff chance: \n");
-    wheelA.setPayOffChance((float) scan.nextInt()/100);
     Wheel wheelB = new Wheel();
-    System.out.print("Set Wheel B's Payoff chance: \n");
-    wheelB.setPayOffChance((float) scan.nextInt()/100);
+    float chanceA = 0;
+    float chanceB = 0;
+    while (chanceA != 100 && chanceB != 100){ //Error Checking system to determine if all percentages do not go beyond 100, or goes less.
+    System.out.print("Set Wheel A's Payoff chance for 0 peso: \n");
+    wheelA.setPayOff0((float) scan.nextInt()/100);
+    System.out.print("Set Wheel A's Payoff chance for 1 peso: \n");
+    wheelA.setPayOff1((float) scan.nextInt()/100);
+    System.out.print("Set Wheel A's Payoff chance for 5 pesos: \n");
+    wheelA.setPayOff5((float) scan.nextInt()/100);
+    System.out.print("Set Wheel A's Payoff chance for 100 pesos: \n");
+    wheelA.setPayOff100((float) scan.nextInt()/100);
 
-    MachineBot bot = new MachineBot();
-    while (game.getMoney() > 0 && game.getTime() > 0){
+    System.out.print("Set Wheel B's Payoff chance for 0 peso: \n");
+    wheelB.setPayOff0((float) scan.nextInt()/100);
+    System.out.print("Set Wheel B's Payoff chance for 1 peso: \n");
+    wheelB.setPayOff1((float) scan.nextInt()/100);
+    System.out.print("Set Wheel B's Payoff chance for 5 pesos: \n");
+    wheelB.setPayOff5((float) scan.nextInt()/100);
+    System.out.print("Set Wheel B's Payoff chance for 100 pesos: \n");
+    wheelB.setPayOff100((float) scan.nextInt()/100);
+
+    chanceA = chanceA+wheelA.getPayOff0()*100;
+    chanceA = chanceA+wheelA.getPayOff1()*100;
+    chanceA = chanceA+wheelA.getPayOff5()*100;
+    chanceA = chanceA+wheelA.getPayOff100()*100;
+
+    chanceB = chanceB+wheelB.getPayOff0()*100;
+    chanceB = chanceB+wheelB.getPayOff1()*100;
+    chanceB = chanceB+wheelB.getPayOff5()*100;
+    chanceB = chanceB+wheelB.getPayOff100()*100;
+
+    if (chanceA == 100 && chanceB == 100){
+        break;
+    } else {
+        System.out.println("Everything should equal to 100 in Wheel A and Wheel B. Try again.");
+        chanceA = 0;
+        chanceB = 0;
+    }
+    }
+
+    MachineBot bot = new MachineBot(); //Initialization of the utility-based bot
+    while (game.getMoney() > 0 && game.getTime() > 0){ //While loop that makes the bot run, until the condition has been satisfied.
         bot.solve(game, wheelA, wheelB);
     }  
     System.out.println(game.getMoney() + " Current money");
     System.out.println(game.getMoney() - oldMoney + " Earned after " + oldTime + " seconds.");
 
-    System.out.println(bot.getAction());
+    System.out.println(bot.getAction()); //Gets the preferred action of the bot.
 
-    System.out.println("Would you like a detailed log of everything that transpired? y/n");
+    System.out.println("Would you like a detailed log of everything that transpired? y/n"); //Gets the detailed logs of the environment, and the actions of the bot.
     String ans = scan.next();
     if (ans.equals("y")) {
             System.out.println("Wheel A logs: " + bot.getListA());
