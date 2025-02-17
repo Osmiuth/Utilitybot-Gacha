@@ -40,14 +40,6 @@ class Wheel {
         private float CurrentChance = 0;
         Random rand = new Random();
 
-        public int getPayOff(){ //Getter method for payoff
-            return this.PayOff;
-        }
-
-        public void setPayOff(int n){ //Setter method for payoff
-            this.PayOff = n;
-        }
-
         public float getPayOffChance(){ //Getter method for chance
             return this.PayOffChance;
         }
@@ -60,6 +52,20 @@ class Wheel {
             game.setMoney(game.getMoney()-1); //decreases the money for every roll
             game.setTime(game.getTime()-10); //decreases the time for every roll
             this.CurrentChance = rand.nextFloat(100); //random function (acts as an RNG element)
+            this.PayOff = rand.nextInt(1,3);
+            switch (this.PayOff) {
+                case 1:
+                    this.PayOff = 1;
+                    break;
+                case 2:
+                    this.PayOff = 5;
+                    break;
+                case 3:
+                    this.PayOff = 100;
+                    break;
+                default:
+                    break;
+            }
             if (this.CurrentChance <= PayOffChance *100){ //probability if-decision
                 game.setMoney(game.getMoney()+this.PayOff); //adds payoff money to the overall money of the player.
             } 
@@ -134,7 +140,7 @@ class MachineBot {
             wheelB.roll(game);
         }
 
-        if ((LWheelA.size() % epoch == 0) && (LWheelB.size() % epoch == 0) && (LWheelA.size() > 0) && (LWheelB.size() > 0)) {
+        if ((Rounds.size() % epoch == 0) && (!LWheelA.isEmpty() && !LWheelB.isEmpty())) {
             index = epoch * 100;
             for (int j = LWheelA.size() - epoch; j < LWheelA.size(); j++) {
                 this.tempA = this.tempA + LWheelA.get(j); //Precept history of wheelA
@@ -160,10 +166,13 @@ class MachineBot {
 
             if (this.tempA > this.tempB){
                 this.action = "preferred_A";
+                Rounds.add(game.getTime()/10+1);
             } else if (this.tempA < this.tempB){
                 this.action = "preferred_B";
+                Rounds.add(game.getTime()/10+1);
             } else if (this.tempA == this.tempB){
                 this.action = "none";
+                Rounds.add(game.getTime()/10+1);
             }
 
         } 
@@ -172,12 +181,12 @@ class MachineBot {
             BotActions.add(this.action);
             Rounds.add(game.getTime()/10);
             wheelA.roll(game);
-            LWheelA.add(game.getMoney()-wheelB.getPayOff()); //Initial stage, where precept history is below the epoch value
+            LWheelA.add(game.getMoney()); //Initial stage, where precept history is below the epoch value
 
             BotActions.add(this.action);
             Rounds.add(game.getTime()/10);
             wheelB.roll(game);
-            LWheelB.add(game.getMoney()-wheelA.getPayOff()); //Initial stage, where precept history is below the epoch value
+            LWheelB.add(game.getMoney()); //Initial stage, where precept history is below the epoch value
             this.action = "none";
 
         }
@@ -206,13 +215,9 @@ public static void main(String[] args){
     int oldTime = game.getTime();
     int oldMoney = game.getMoney();
     Wheel wheelA = new Wheel();
-    System.out.print("Set Wheel A's Payoff: \n");
-    wheelA.setPayOff((int) scan.nextInt());
     System.out.print("Set Wheel A's Payoff chance: \n");
     wheelA.setPayOffChance((float) scan.nextInt()/100);
     Wheel wheelB = new Wheel();
-    System.out.print("Set Wheel B's Payoff: \n");
-    wheelB.setPayOff((int) scan.nextInt());
     System.out.print("Set Wheel B's Payoff chance: \n");
     wheelB.setPayOffChance((float) scan.nextInt()/100);
 
