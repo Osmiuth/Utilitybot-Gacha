@@ -311,6 +311,12 @@ public static void main(String[] args){
     chanceB = chanceB+wheelB.getPayOff100()*100;
 
     if (chanceA == 100 && chanceB == 100){
+        wheelA.setPayOff1(wheelA.getPayOff1() + wheelA.getPayOff0());
+        wheelA.setPayOff5(wheelA.getPayOff5() + wheelA.getPayOff1());
+        wheelA.setPayOff100(wheelA.getPayOff100() + wheelA.getPayOff5());
+        wheelB.setPayOff1(wheelB.getPayOff1() + wheelB.getPayOff0());
+        wheelB.setPayOff5(wheelB.getPayOff5() + wheelB.getPayOff1());
+        wheelB.setPayOff100(wheelB.getPayOff100() + wheelB.getPayOff5());
         break;
     } else {
         System.out.println("Everything should equal to 100 in Wheel A and Wheel B. Try again.");
@@ -323,6 +329,41 @@ public static void main(String[] args){
     while (game.getMoney() > 0 && game.getTime() > 0){ //While loop that makes the bot run, until the condition has been satisfied.
         bot.solve(game, wheelA, wheelB);
     }  
+
+    
+    int a = 0;
+    int b = 0;
+    int temp = oldMoney;
+    for(int i = 0; i < bot.getBotActions().size(); i++){
+        if(bot.getBotActions().get(i) == "rolling" && a < bot.getEpoch() && b < bot.getEpoch()){
+            System.out.println("Rolling");
+            System.out.println("You earned: " + (bot.getListA().get(a) - (temp-1)));
+            System.out.println("Current money is now: " + bot.getListA().get(a));
+            temp = bot.getListA().get(a);
+            a++;
+
+            System.out.println("Rolling");
+            System.out.println("You earned: " + (bot.getListB().get(b) - (temp-1)));
+            System.out.println("Current money is now: " + bot.getListB().get(b));
+            temp = bot.getListB().get(b);
+            b++;
+        }
+        else if(bot.getBotActions().get(i) == "preferred_A"){
+            System.out.println("Rolling on Machine A");
+            System.out.println("You earned: " + (bot.getListA().get(a) - (temp-1)));
+            System.out.println("Current money is now: " + bot.getListA().get(a));
+            temp = bot.getListA().get(a);
+            a++;
+        }
+        else if(bot.getBotActions().get(i) == "preferred_B"){
+            System.out.println("Rolling on Machine B");
+            System.out.println("You earned: " + (bot.getListB().get(b) - (temp-1)));
+            System.out.println("Current money is now: " + bot.getListB().get(b));
+            temp = bot.getListB().get(b);
+            b++;
+        }
+    }
+    
     System.out.println(game.getMoney() + " Current money");
     System.out.println(game.getMoney() - oldMoney + " Earned after " + oldTime + " seconds.");
 
